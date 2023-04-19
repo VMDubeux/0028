@@ -351,7 +351,10 @@
 -r:"Library/Bee/artifacts/1900b0aE.dag/UnityEngine.UI.ref.dll"
 "Assets/Lava/Scripts/ScrollingUVs_Layers.cs"
 "Assets/Naves/Readme/Readme Files/Scripts/ReadmeStarSparrow.cs"
+"Assets/Scripts/EnemyAI.cs"
+"Assets/Scripts/EnemyHealth.cs"
 "Assets/Scripts/PlayerController.cs"
+"Assets/Scripts/PlayerHealth.cs"
 -langversion:9.0
 
 /deterministic
