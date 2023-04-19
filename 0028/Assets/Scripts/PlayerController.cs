@@ -8,6 +8,10 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField] Transform _target;
     [SerializeField] Camera _cameraFPS;
+    Rigidbody _rgbodyPlayer;
+    RaycastHit _hit;
+    Vector3 _direction;
+    public LayerMask _layerMask;
     [SerializeField] float _range = 100.0f;
     [SerializeField] float _moveSpeed = 20f;
     [SerializeField] float _turnSpeed = 1f;
@@ -16,29 +20,26 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
-
+        _rgbodyPlayer = GetComponent<Rigidbody>();
     }
 
     void Update()
     {
-        MovePlayer();
-        FaceTarget();
+        //FaceTarget();
         Fire();
     }
 
-    void MovePlayer()
+    void FixedUpdate()
     {
-        _xValue = Input.GetAxis("Horizontal") * -1 * Time.deltaTime * _moveSpeed;
-        _yValue = Input.GetAxis("Vertical") * Time.deltaTime * _moveSpeed;
-        transform.Translate(_xValue, _yValue, _zValue);
+        MovePlayer();
+        RotationAimPosition();
     }
 
-    void FaceTarget()
+    /*void FaceTarget()
     {
-        Vector3 direction = (_target.position - transform.position).normalized;
-        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(_direction.x, 0, _direction.z));
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * _turnSpeed);
-    }
+    }*/
 
     void Fire()
     {
@@ -46,10 +47,38 @@ public class PlayerController : MonoBehaviour
             Shoot();
     }
 
+    void MovePlayer()
+    {
+        _xValue = Input.GetAxis("Horizontal") * -1 * Time.deltaTime * _moveSpeed;
+        _yValue = Input.GetAxis("Vertical") * Time.deltaTime * _moveSpeed;
+        transform.Translate(_xValue, _yValue, _zValue);
+        RigidbodyMovePlayer();
+    }
+
+    void RotationAimPosition()
+    {
+        Ray raio = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Debug.DrawRay(_cameraFPS.transform.position, _cameraFPS.transform.forward * 100, Color.cyan);
+        _direction = (_target.position - transform.position).normalized;
+        if (Physics.Raycast(raio, out _hit, _range, _layerMask))
+        {
+            Vector3 _aimPlayerPosition = _hit.point - transform.position;
+            Quaternion _newRotation = Quaternion.LookRotation(_aimPlayerPosition);
+            _rgbodyPlayer.MoveRotation(_newRotation);
+        }
+    }
+
+    void RigidbodyMovePlayer()
+    {
+        _rgbodyPlayer.MovePosition
+                   (_rgbodyPlayer.position +
+                   (_direction * _moveSpeed * Time.deltaTime));
+    }
+
     void Shoot()
     {
-        RaycastHit _hit;
-        if (Physics.Raycast(_cameraFPS.transform.position, _cameraFPS.transform.forward, out _hit, _range))
+        Ray raio = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(raio, out _hit, _range, _layerMask))
         {
             EnemyHealth _target = _hit.transform.GetComponent<EnemyHealth>();
             if (_target == null) return;
@@ -58,3 +87,4 @@ public class PlayerController : MonoBehaviour
         else return;
     }
 }
+
